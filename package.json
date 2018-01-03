@@ -1,0 +1,23 @@
+{
+  "name": "bolero.lib",
+  "version": "0.0.1",
+  "description": "Bolero Library",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Roman Semko",
+  "license": "ISC",
+  "dependencies": {
+    "iota.lib.js": "0.4.5",
+    "request": "^2.83.0",
+    "tmp": "^0.0.33"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "jest": "^21.2.1",
+    "rimraf": "^2.6.2"
+  }
+}
