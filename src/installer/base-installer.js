@@ -1,6 +1,7 @@
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
+const rimraf = require('rimraf');
 
 const DEFAULT_OPTIONS = {
     targetDir: ''
@@ -24,7 +25,7 @@ class BaseInstaller {
         if (!this.isInstalled()) {
             return;
         }
-        fs.readdirSync(this.targetDir).forEach((filename) => fs.unlinkSync(path.join(this.targetDir, filename)));
+        fs.readdirSync(this.targetDir).forEach((filename) => rimraf.sync(path.join(this.targetDir, filename)));
     }
 
     reinstall () {

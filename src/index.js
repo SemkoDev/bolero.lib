@@ -9,5 +9,7 @@ module.exports = {
     Controller,
     installer,
     settings,
-    system
+    system,
+    iri,
+    nelson
 };

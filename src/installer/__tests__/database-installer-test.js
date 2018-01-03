@@ -1,31 +1,32 @@
 const fs = require('fs');
+const expect = require('chai').expect;
 const { DatabaseInstaller } = require('../database-installer');
 
 describe('DatabaseInstaller', () => {
-    const source = 'http://www.vim.org/scripts/download_script.php?src_id=6273';
+    const source = 'https://github.com/phayes/geoPHP/archive/1.2.tar.gz';
 
     it('Installs latest version correctly', (done) => {
         const installer = new DatabaseInstaller({ source });
         installer.install(null, () => {
-            expect(fs.existsSync(installer.getTargetFileName())).toBeTruthy;
+            expect(installer.isInstalled()).to.be.true;
             done();
         });
-    }, 30000);
+    });
     it('Uninstalls latest version correctly', (done) => {
         const installer = new DatabaseInstaller({ source });
         installer.install(null, () => {
             installer.uninstall();
-            expect(fs.existsSync(installer.getTargetFileName())).toBeFalsy;
+            expect(installer.isInstalled()).to.be.false;
             done();
         });
-    }, 30000);
+    });
     it('Reinstalls latest version correctly', (done) => {
         const installer = new DatabaseInstaller({ source });
         installer.install(null, () => {
-            installer.reinstall(() => {
-                expect(fs.existsSync(installer.getTargetFileName())).toBeTruthy;
+            installer.reinstall(null, () => {
+                expect(installer.isInstalled()).to.be.true;
                 done();
             });
         });
-    }, 60000);
+    });
 });

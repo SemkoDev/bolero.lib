@@ -50,7 +50,7 @@ class BasePackageInstaller extends BaseInstaller {
             onEnd && onEnd();
             return;
         }
-        console.log('NOT installed', fs.existsSync(this.getTargetFileName()), super.isInstalled(), this.getTargetFileName());
+
         this.selectVersion().then((version) => {
             if (!version) {
                 onError && onError(new Error(`could not find version ${this.opts.version} in latest!`));

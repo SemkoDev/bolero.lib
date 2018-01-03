@@ -9,7 +9,6 @@ describe('Nelson', () => {
     const iriInstaller = new IRIInstaller({ targetDir });
 
     before((done) => {
-        console.log('Installing IRI. Please wait...');
         iriInstaller.install(null, () => done(), (err) => {throw err});
     });
 

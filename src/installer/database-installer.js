@@ -20,7 +20,7 @@ class DatabaseInstaller extends BaseInstaller {
     }
 
     getTargetFileName () {
-        return this.opts.source.split('/').splice(-1)[0]
+        return path.join(this.targetDir, this.opts.source.split('/').splice(-1)[0]);
     }
 
     install (onProgress, onEnd, onError) {
@@ -28,7 +28,7 @@ class DatabaseInstaller extends BaseInstaller {
             onEnd && onEnd();
             return;
         }
-        const target = path.join(this.targetDir, this.getTargetFileName());
+        const target = this.getTargetFileName();
 
         progress(request(this.opts.source), {
             // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms
