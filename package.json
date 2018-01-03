@@ -1,23 +1,48 @@
 {
   "name": "bolero.lib",
   "version": "0.0.1",
-  "description": "Bolero Library",
-  "main": "index.js",
-  "scripts": {
-    "test": "test"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SemkoDev/bolero.lib.git"
   },
-  "author": "Roman Semko",
+  "description": "CarrIOTA Bolero Library",
+  "main": "dist/index.js",
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --timeout 60000 --ui bdd src/**/*-test.js",
+    "build": "rimraf dist/ && babel ./src --out-dir dist/ --ignore ./node_modules --ignore __tests__ --copy-files",
+    "make": "npm run test && npm run build"
+  },
+  "keywords": [
+    "blockchain",
+    "IOTA",
+    "tangle",
+    "p2p",
+    "CarrIOTA"
+  ],
+  "homepage": "https://semkodev.com",
+  "author": "Roman Semko <roman@deviota.com> (http://twitter.com/RomanSemko)",
   "license": "ISC",
   "dependencies": {
-    "iota.lib.js": "0.4.5",
+    "diskspace": "^2.0.0",
+    "get-latest-release": "^1.1.2",
+    "iota.lib.js": "^0.4.6",
+    "nelson.cli": "^0.3.5",
     "request": "^2.83.0",
+    "request-progress": "^3.0.0",
+    "targz": "^1.0.1",
     "tmp": "^0.0.33"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
-    "jest": "^21.2.1",
+    "chai": "^4.1.2",
+    "mocha": "^4.1.0",
     "rimraf": "^2.6.2"
   }
 }

@@ -2,38 +2,38 @@ const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
 
-const DEFAULT_CONFIG = {
+const DEFAULT_SETTINGS = {
   version: 0
 };
 
 tmp.setGracefulCleanup();
 
-class Config {
+class Settings {
     constructor(options) {
         this.opts = options || {};
-        this.configPath = path.join(this.opts.basePath || tmp.dirSync().name, 'config.json');
-        this.config = this.loadConfig();
+        this.settingsPath = path.join(this.opts.basePath || tmp.dirSync().name, 'settings.json');
+        this.settings = this.loadSettings();
     }
 
-    loadConfig () {
-        if (!fs.existsSync(this.configPath)) {
-            return this.saveConfig(DEFAULT_CONFIG)
+    loadSettings () {
+        if (!fs.existsSync(this.settingsPath)) {
+            return this.saveSettings(DEFAULT_SETTINGS)
         }
-        return JSON.parse(fs.readFileSync(this.configPath));
+        return JSON.parse(fs.readFileSync(this.settingsPath));
     }
 
-    saveConfig (config) {
-        this.config = Object.assign({}, this.config, config);
-        fs.writeFileSync(this.configPath, JSON.stringify(this.config));
-        return this.config;
+    saveSettings (config) {
+        this.settings = Object.assign({}, this.settings, config);
+        fs.writeFileSync(this.settingsPath, JSON.stringify(this.settings));
+        return this.settings;
     }
 
-    getConfig () {
-        return this.config
+    getSettings () {
+        return this.settings
     }
 }
 
 module.exports = {
-    Config,
-    DEFAULT_CONFIG
+    Settings,
+    DEFAULT_SETTINGS
 };
