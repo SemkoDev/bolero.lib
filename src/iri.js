@@ -31,7 +31,7 @@ class IRI {
         this.process.on('close', (code) => {
             if (this.process) {
                 this.running = false;
-                onError && onError()
+                onError && onError(new Error(`IRI exited with status ${code}`))
             }
         });
 
@@ -78,6 +78,10 @@ DB_LOG_PATH = ${this.opts.dbPath}
 PORT = ${this.opts.port}
 IXI_DIR = ${path.join(this.opts.dbPath, 'ixi')}
 HEADLESS = true
+DEBUG = false
+TESTNET = false
+RESCAN_DB = false
+REMOTE_LIMIT_API="removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors"
         `);
         return filename
     }

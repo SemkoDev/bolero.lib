@@ -24,6 +24,7 @@ class Nelson {
         const { onError, onStarted } = this.opts;
 
         this.node = new Node({
+            name: 'Bolero',
             neighbors: this.neighbors,
             silent: true,
             IRIPort: this.opts.iriPort,
@@ -31,7 +32,6 @@ class Nelson {
         });
 
         return this.node.start().then(() => {
-            // TODO: WEBHOOKS here?
             this.running = true;
             onStarted && onStarted();
         }).catch(onError);
@@ -63,7 +63,7 @@ class Nelson {
         const { onStopped } = this.opts;
 
         if (!this.node) {
-            return;
+            return Promise.resolve();
         }
         return this.node.end().then(() => {
             this.running = false;

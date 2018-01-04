@@ -4,5 +4,6 @@ const database = require('./database-installer');
 
 module.exports = {
     iri,
-    nelson
-}
+    nelson,
+    database
+};

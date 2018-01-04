@@ -1,4 +1,4 @@
-const Controller = require('./controller');
+const { Controller } = require('./controller');
 const installer = require('./installer');
 const settings = require('./settings');
 const system = require('./system');
