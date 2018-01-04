@@ -11,6 +11,8 @@ const DEFAULT_OPTIONS = {
     source: 'http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz',
 };
 
+tmp.setGracefulCleanup();
+
 class DatabaseInstaller extends BaseInstaller {
     constructor (options) {
         const opts = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -19,8 +21,8 @@ class DatabaseInstaller extends BaseInstaller {
         }));
     }
 
-    getTargetFileName () {
-        return path.join(this.targetDir, this.opts.source.split('/').splice(-1)[0]);
+    getTargetFileName (temp=false) {
+        return path.join(temp ? tmp.dirSync().name : this.targetDir, this.opts.source.split('/').splice(-1)[0]);
     }
 
     install (onProgress, onEnd, onError) {
@@ -28,7 +30,7 @@ class DatabaseInstaller extends BaseInstaller {
             onEnd && onEnd();
             return;
         }
-        const target = this.getTargetFileName();
+        const target = this.getTargetFileName(true);
 
         progress(request(this.opts.source), {
             // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms

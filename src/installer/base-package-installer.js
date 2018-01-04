@@ -1,6 +1,7 @@
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
+const rimraf = require('rimraf');
 const request = require('request');
 const getLatestRelease = require('get-latest-release');
 const progress = require('request-progress');
@@ -13,6 +14,8 @@ const DEFAULT_OPTIONS = {
         repo: 'nelson.cli',
     },
 };
+
+tmp.setGracefulCleanup();
 
 class BasePackageInstaller extends BaseInstaller {
     constructor (options) {
@@ -51,6 +54,8 @@ class BasePackageInstaller extends BaseInstaller {
             return;
         }
 
+        const target = path.join(tmp.dirSync().name, this.getName());
+
         this.selectVersion().then((version) => {
             if (!version) {
                 onError && onError(new Error(`could not find version ${this.opts.version} in latest!`));
@@ -80,9 +85,10 @@ class BasePackageInstaller extends BaseInstaller {
                     onError && onError(err)
                 })
                 .on('end', () => {
+                    fs.renameSync(target, this.getTargetFileName());
                     onEnd && onEnd()
                 })
-                .pipe(fs.createWriteStream(this.getTargetFileName()));
+                .pipe(fs.createWriteStream(target));
         })
     }
 }

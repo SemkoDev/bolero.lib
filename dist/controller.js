@@ -5,6 +5,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var path = require('path');
+var fs = require('fs');
 var installer = require('./installer');
 var iri = require('./iri');
 var nelson = require('./nelson');
@@ -25,9 +26,11 @@ var Controller = function () {
         this.opts = Object.assign({}, DEFAULT_OPTIONS, options);
         this.state = {};
         var targetDir = this.opts.targetDir || path.join(process.cwd(), 'data');
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir);
+        }
         this.targetDir = targetDir;
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir: targetDir });
-        this.nelsonInstaller = new installer.nelson.NelsonInstaller({ targetDir: targetDir });
         this.databaseInstaller = new installer.database.DatabaseInstaller({ targetDir: targetDir });
         this.iri = new iri.IRI({
             iriPath: this.iriInstaller.getTargetFileName(),
@@ -46,20 +49,20 @@ var Controller = function () {
         this.settings = new settings.Settings();
         this.state = {
             system: {
-                status: 'pristine',
+                status: 'waiting',
                 hasEnoughSpace: false,
                 hasEnoughMemory: false,
                 hasJavaInstalled: false,
                 isSupportedPlatform: false
             },
             iri: {
-                status: 'pristine'
+                status: 'waiting'
             },
             nelson: {
-                status: 'pristine'
+                status: 'waiting'
             },
             database: {
-                status: 'pristine'
+                status: 'waiting'
             }
         };
         this.updater = null;
@@ -110,7 +113,7 @@ var Controller = function () {
             return new Promise(function (resolve, reject) {
                 _this3.checkSystem().then(function (ready) {
                     if (ready) {
-                        Promise.all([_this3.install('iri'), _this3.install('nelson'), _this3.install('database')]).then(function () {
+                        Promise.all([_this3.install('iri'), _this3.install('database')]).then(function () {
                             Promise.all([_this3.startIRI(), _this3.startNelson()]).then(function () {
                                 _this3.updater = setInterval(function () {
                                     return _this3.tick();
@@ -138,15 +141,6 @@ var Controller = function () {
                 this.updater = null;
             }
             return this.nelson.stop().then(function () {
-                if (_this4.state.iri.status === 'downloading') {
-                    _this4.iriInstaller.uninstall();
-                }
-                if (_this4.state.nelson.status === 'downloading') {
-                    _this4.nelsonInstaller.uninstall();
-                }
-                if (_this4.state.database.status === 'downloading') {
-                    _this4.databaseInstaller.uninstall();
-                }
                 _this4.iri.stop();
                 _this4.updateState('nelson', { status: 'stopped' });
                 _this4.updateState('iri', { status: 'stopped' });
@@ -209,7 +203,8 @@ var Controller = function () {
                 _this7.updateState('system', {
                     status: isReady ? 'ready' : 'error',
                     isSupportedPlatform: isSupportedPlatform,
-                    hasEnoughMemory: hasEnoughMemory
+                    hasEnoughMemory: hasEnoughMemory,
+                    error: hasEnoughSpace ? hasJavaInstalled ? isSupportedPlatform ? hasEnoughMemory ? '' : 'not enough RAM (+4GB)' : 'operating system is not supported' : 'java is not installed' : 'not enough free space (+8GB)'
                 });
                 return isReady;
             });
@@ -223,9 +218,6 @@ var Controller = function () {
             switch (component) {
                 case 'iri':
                     installer = this.iriInstaller;
-                    break;
-                case 'nelson':
-                    installer = this.nelsonInstaller;
                     break;
                 case 'database':
                 default:

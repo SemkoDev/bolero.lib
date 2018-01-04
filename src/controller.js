@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const installer = require('./installer');
 const iri = require('./iri');
 const nelson = require('./nelson');
@@ -15,9 +16,11 @@ class Controller {
         this.opts = Object.assign({}, DEFAULT_OPTIONS, options);
         this.state = {};
         const targetDir = this.opts.targetDir || path.join(process.cwd(), 'data');
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir);
+        }
         this.targetDir = targetDir;
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir });
-        this.nelsonInstaller = new installer.nelson.NelsonInstaller({ targetDir });
         this.databaseInstaller = new installer.database.DatabaseInstaller({ targetDir });
         this.iri = new iri.IRI({
             iriPath: this.iriInstaller.getTargetFileName(),
@@ -36,20 +39,20 @@ class Controller {
         this.settings = new settings.Settings();
         this.state = {
             system: {
-                status: 'pristine',
+                status: 'waiting',
                 hasEnoughSpace: false,
                 hasEnoughMemory: false,
                 hasJavaInstalled: false,
                 isSupportedPlatform: false
             },
             iri: {
-                status: 'pristine'
+                status: 'waiting'
             },
             nelson: {
-                status: 'pristine'
+                status: 'waiting'
             },
             database: {
-                status: 'pristine'
+                status: 'waiting'
             },
         };
         this.updater = null;
@@ -89,7 +92,6 @@ class Controller {
                 if (ready) {
                     Promise.all([
                         this.install('iri'),
-                        this.install('nelson'),
                         this.install('database'),
                     ]).then(() => {
                         Promise.all([
@@ -117,15 +119,6 @@ class Controller {
             this.updater = null;
         }
         return this.nelson.stop().then(() => {
-            if (this.state.iri.status === 'downloading') {
-                this.iriInstaller.uninstall();
-            }
-            if (this.state.nelson.status === 'downloading') {
-                this.nelsonInstaller.uninstall();
-            }
-            if (this.state.database.status === 'downloading') {
-                this.databaseInstaller.uninstall();
-            }
             this.iri.stop();
             this.updateState('nelson', { status: 'stopped' });
             this.updateState('iri', { status: 'stopped' });
@@ -176,7 +169,16 @@ class Controller {
             this.updateState('system', {
                 status: isReady ? 'ready' : 'error',
                 isSupportedPlatform,
-                hasEnoughMemory
+                hasEnoughMemory,
+                error: hasEnoughSpace
+                    ? hasJavaInstalled
+                        ? isSupportedPlatform
+                            ? hasEnoughMemory
+                                ? ''
+                                : 'not enough RAM (+4GB)'
+                            : 'operating system is not supported'
+                        : 'java is not installed'
+                    : 'not enough free space (+8GB)'
             });
             return isReady;
         })
@@ -187,9 +189,6 @@ class Controller {
         switch (component) {
             case 'iri':
                 installer = this.iriInstaller;
-                break;
-            case 'nelson':
-                installer = this.nelsonInstaller;
                 break;
             case 'database':
             default:

@@ -13,6 +13,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var path = require('path');
 var tmp = require('tmp');
 var fs = require('fs');
+var rimraf = require('rimraf');
 var request = require('request');
 var getLatestRelease = require('get-latest-release');
 var progress = require('request-progress');
@@ -27,6 +28,8 @@ var DEFAULT_OPTIONS = {
         repo: 'nelson.cli'
     }
 };
+
+tmp.setGracefulCleanup();
 
 var BasePackageInstaller = function (_BaseInstaller) {
     _inherits(BasePackageInstaller, _BaseInstaller);
@@ -82,6 +85,8 @@ var BasePackageInstaller = function (_BaseInstaller) {
                 return;
             }
 
+            var target = path.join(tmp.dirSync().name, this.getName());
+
             this.selectVersion().then(function (version) {
                 if (!version) {
                     onError && onError(new Error('could not find version ' + _this2.opts.version + ' in latest!'));
@@ -108,8 +113,9 @@ var BasePackageInstaller = function (_BaseInstaller) {
                 }).on('error', function (err) {
                     onError && onError(err);
                 }).on('end', function () {
+                    fs.renameSync(target, _this2.getTargetFileName());
                     onEnd && onEnd();
-                }).pipe(fs.createWriteStream(_this2.getTargetFileName()));
+                }).pipe(fs.createWriteStream(target));
             });
         }
     }]);
