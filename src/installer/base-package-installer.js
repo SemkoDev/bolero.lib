@@ -1,7 +1,6 @@
 const path = require('path');
 const tmp = require('tmp');
-const fs = require('fs');
-const move = require('move-file');
+const fs = require('fs-extra');
 const request = require('request');
 const getLatestRelease = require('get-latest-release');
 const progress = require('request-progress');
@@ -85,9 +84,8 @@ class BasePackageInstaller extends BaseInstaller {
                     onError && onError(err)
                 })
                 .on('end', () => {
-                    move(target, this.getTargetFileName()).then(() => {
-                        onEnd && onEnd();
-                    });
+                    fs.moveSync(target, this.getTargetFileName());
+                    onEnd && onEnd()
                 })
                 .pipe(fs.createWriteStream(target));
         })
@@ -97,4 +95,4 @@ class BasePackageInstaller extends BaseInstaller {
 module.exports = {
     BasePackageInstaller,
     DEFAULT_OPTIONS
-}
+};

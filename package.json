@@ -1,6 +1,6 @@
 {
   "name": "bolero.lib",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/SemkoDev/bolero.lib.git"
@@ -29,9 +29,9 @@
   "license": "ISC",
   "dependencies": {
     "diskspace": "^2.0.0",
+    "fs-extra": "^5.0.0",
     "get-latest-release": "^1.1.2",
     "iota.lib.js": "^0.4.6",
-    "move-file": "^1.0.0",
     "nelson.cli": "^0.3.5",
     "request": "^2.83.0",
     "request-progress": "^3.0.0",
