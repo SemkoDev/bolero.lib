@@ -1,7 +1,7 @@
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
-const rimraf = require('rimraf');
+const move = require('move-file');
 const request = require('request');
 const getLatestRelease = require('get-latest-release');
 const progress = require('request-progress');
@@ -85,8 +85,9 @@ class BasePackageInstaller extends BaseInstaller {
                     onError && onError(err)
                 })
                 .on('end', () => {
-                    fs.renameSync(target, this.getTargetFileName());
-                    onEnd && onEnd()
+                    move(target, this.getTargetFileName()).then(() => {
+                        onEnd && onEnd();
+                    });
                 })
                 .pipe(fs.createWriteStream(target));
         })
