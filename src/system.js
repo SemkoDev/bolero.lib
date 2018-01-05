@@ -53,8 +53,8 @@ class System {
     hasJavaInstalled () {
         return new Promise ((resolve) => {
             const spawn = child_process.spawn('java', ['-version']);
-            spawn.on('error', (err) => {
-                return callback(err, null);
+            spawn.on('error', () => {
+                return resolve(false);
             });
             spawn.stderr.on('data', (data) => {
                 data = data.toString().split('\n')[0];
