@@ -71,8 +71,8 @@ var System = function () {
         value: function hasJavaInstalled() {
             return new Promise(function (resolve) {
                 var spawn = child_process.spawn('java', ['-version']);
-                spawn.on('error', function (err) {
-                    return callback(err, null);
+                spawn.on('error', function () {
+                    return resolve(false);
                 });
                 spawn.stderr.on('data', function (data) {
                     data = data.toString().split('\n')[0];
