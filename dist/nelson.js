@@ -183,7 +183,7 @@ function getNodeStats(node) {
     });
 
     return {
-        name: node.name,
+        name: node.opts.name,
         version: version,
         ready: node._ready,
         isIRIHealthy: isIRIHealthy,
