@@ -28,6 +28,7 @@ class Nelson {
             neighbors: this.neighbors,
             silent: true,
             IRIPort: this.opts.iriPort,
+            IRIProtocol: 'prefertcp',
             dataPath: path.join(this.opts.dataPath, 'neighbors.db')
         });
 
