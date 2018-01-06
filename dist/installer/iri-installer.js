@@ -8,6 +8,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var fs = require('fs-extra');
+var path = require('path');
+
 var _require = require('./base-package-installer'),
     BasePackageInstaller = _require.BasePackageInstaller;
 
@@ -32,7 +35,23 @@ var IRIInstaller = function (_BasePackageInstaller) {
     _createClass(IRIInstaller, [{
         key: 'getName',
         value: function getName() {
-            return 'iri-' + this.opts.latestVersion + '.jar';
+            // TODO: replace when IRI bug #350 is fixed and published: https://github.com/iotaledger/iri/issues/350
+            return 'iri-' + this.opts.latestVersion + '-bolero.jar';
+            // return `iri-${this.opts.latestVersion}.jar`;
+        }
+
+        // TODO: remove when IRI bug #350 is fixed and published: https://github.com/iotaledger/iri/issues/350
+
+    }, {
+        key: 'install',
+        value: function install(onProgress, onEnd, onError) {
+            if (this.isInstalled()) {
+                onEnd && onEnd();
+                return;
+            }
+            fs.copySync(path.join(__dirname, '..', '..', this.getName()), this.getTargetFileName());
+            onEnd && onEnd();
+            return Promise.resolve();
         }
     }]);
 
