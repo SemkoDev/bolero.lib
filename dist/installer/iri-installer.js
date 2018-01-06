@@ -13,7 +13,7 @@ var _require = require('./base-package-installer'),
 
 var DEFAULT_OPTIONS = {
     name: 'iri',
-    latestVersion: '1.4.1.4',
+    latestVersion: '1.4.1.6',
     repo: {
         owner: 'iotaledger',
         repo: 'iri'
