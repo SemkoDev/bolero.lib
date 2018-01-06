@@ -15,7 +15,7 @@ var _require = require('./base-package-installer'),
 
 var DEFAULT_OPTIONS = {
     name: 'nelson',
-    latestVersion: '0.3.8',
+    latestVersion: '0.3.9',
     repo: {
         owner: 'SemkoDev',
         repo: 'nelson.cli'
