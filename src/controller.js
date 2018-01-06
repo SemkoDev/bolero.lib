@@ -75,13 +75,15 @@ class Controller {
         };
         if (this.state.iri.status === 'running') {
             this.iri.getNodeInfo().then((info) => {
-                this.updateState('iri', { info })
+                this.updateState('iri', { info });
+                getNelsonInfo();
             }).catch((err) => {
                 this.updateState('iri', { status: 'error', error: err.message });
                 getNelsonInfo();
             });
         } else if (this.state.iri.status === 'error') {
             this.iri.stop();
+            getNelsonInfo();
             setTimeout(() => this.iri.start(), 5000);
         }
     }

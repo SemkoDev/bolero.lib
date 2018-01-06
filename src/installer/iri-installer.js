@@ -2,7 +2,7 @@ const { BasePackageInstaller } = require('./base-package-installer');
 
 const DEFAULT_OPTIONS = {
     name: 'iri',
-    latestVersion: '1.4.1.4',
+    latestVersion: '1.4.1.6',
     repo: {
         owner: 'iotaledger',
         repo: 'iri',
