@@ -120,11 +120,10 @@ class Controller {
             clearInterval(this.updater);
             this.updater = null;
         }
+        this.iri.stop('SIGKILL');
+        this.updateState('iri', { status: 'stopped' });
         return this.nelson.stop().then(() => {
-            this.iri.stop();
             this.updateState('nelson', { status: 'stopped' });
-            this.updateState('iri', { status: 'stopped' });
-
             return true;
         })
     }
