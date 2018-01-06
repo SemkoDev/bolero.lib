@@ -94,12 +94,14 @@ var Controller = function () {
             if (this.state.iri.status === 'running') {
                 this.iri.getNodeInfo().then(function (info) {
                     _this2.updateState('iri', { info: info });
+                    getNelsonInfo();
                 }).catch(function (err) {
                     _this2.updateState('iri', { status: 'error', error: err.message });
                     getNelsonInfo();
                 });
             } else if (this.state.iri.status === 'error') {
                 this.iri.stop();
+                getNelsonInfo();
                 setTimeout(function () {
                     return _this2.iri.start();
                 }, 5000);
