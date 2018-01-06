@@ -3,7 +3,7 @@ const { BasePackageInstaller } = require('./base-package-installer');
 
 const DEFAULT_OPTIONS = {
     name: 'nelson',
-    latestVersion: '0.3.9',
+    latestVersion: '0.3.11',
     repo: {
         owner: 'SemkoDev',
         repo: 'nelson.cli',
