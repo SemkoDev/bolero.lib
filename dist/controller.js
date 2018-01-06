@@ -142,11 +142,10 @@ var Controller = function () {
                 clearInterval(this.updater);
                 this.updater = null;
             }
+            this.iri.stop('SIGKILL');
+            this.updateState('iri', { status: 'stopped' });
             return this.nelson.stop().then(function () {
-                _this4.iri.stop();
                 _this4.updateState('nelson', { status: 'stopped' });
-                _this4.updateState('iri', { status: 'stopped' });
-
                 return true;
             });
         }
