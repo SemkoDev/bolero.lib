@@ -60,8 +60,9 @@ class System {
                         if (err) {
                             resolve(false);
                         } else {
-                            this.opts.onMessage('Not enough space in temp directory!');
-                            resolve(info.free >= this.opts.minimalSpace * 1024 * 1024);
+                            const result = info.free >= this.opts.minimalSpace * 1024 * 1024;
+                            !result && this.opts.onMessage('Not enough space in temp directory!');
+                            resolve(result);
                         }
                     });
                 }
@@ -84,7 +85,7 @@ class System {
                 resolve(javaVersion !== false && this._checkJavaVersion(javaVersion));
             });
         }).then((result) => {
-            this.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
+            !result && this.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
             return result;
         })
     }
