@@ -65,13 +65,17 @@ var System = function () {
             var _this2 = this;
 
             return new Promise(function (resolve) {
-                diskspace.check(os.homedir(), function (err, info) {
+                var isWindows = os.platform() === 'win32';
+                diskspace.check(isWindows ? 'C' : os.homedir(), function (err, info) {
                     if (err) {
                         resolve(false);
                     } else {
                         if (info.free < _this2.opts.minimalSpace * 1024 * 1024) {
                             _this2.opts.onMessage('Not enough space in home directory!');
-                            resolve(false);
+                            return resolve(false);
+                        }
+                        if (isWindows) {
+                            return resolve(true);
                         }
                         diskspace.check(os.tmpdir(), function (err, info) {
                             if (err) {
