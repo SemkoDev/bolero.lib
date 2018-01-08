@@ -77,8 +77,9 @@ var System = function () {
                             if (err) {
                                 resolve(false);
                             } else {
-                                _this2.opts.onMessage('Not enough space in temp directory!');
-                                resolve(info.free >= _this2.opts.minimalSpace * 1024 * 1024);
+                                var result = info.free >= _this2.opts.minimalSpace * 1024 * 1024;
+                                !result && _this2.opts.onMessage('Not enough space in temp directory!');
+                                resolve(result);
                             }
                         });
                     }
@@ -104,7 +105,7 @@ var System = function () {
                     resolve(javaVersion !== false && _this3._checkJavaVersion(javaVersion));
                 });
             }).then(function (result) {
-                _this3.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
+                !result && _this3.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
                 return result;
             });
         }
