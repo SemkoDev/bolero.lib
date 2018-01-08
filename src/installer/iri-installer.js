@@ -8,7 +8,7 @@ const DEFAULT_OPTIONS = {
     repo: {
         owner: 'iotaledger',
         repo: 'iri',
-    },
+    }
 };
 
 class IRIInstaller extends BasePackageInstaller {

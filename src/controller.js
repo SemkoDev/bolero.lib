@@ -8,34 +8,51 @@ const settings = require('./settings');
 
 const DEFAULT_OPTIONS = {
     targetDir: null,
-    onStateChange: (state) => {}
+    maxMessages: 1000,
+    onStateChange: (state) => {},
+    onMessage: (messages) => {},
 };
 
 class Controller {
     constructor(options) {
         this.opts = Object.assign({}, DEFAULT_OPTIONS, options);
         this.state = {};
+        this.messages = {
+            iri: [],
+            system: [],
+            database: [],
+            nelson: []
+        };
         const targetDir = this.opts.targetDir || path.join(process.cwd(), 'data');
         if (!fs.existsSync(targetDir)) {
             fs.mkdirSync(targetDir);
         }
         this.targetDir = targetDir;
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir });
-        this.databaseInstaller = new installer.database.DatabaseInstaller({ targetDir });
+        this.databaseInstaller = new installer.database.DatabaseInstaller({
+            targetDir,
+            onMessage: (message) => this.message('database', message)
+        });
         this.iri = new iri.IRI({
             iriPath: this.iriInstaller.getTargetFileName(),
             dbPath: this.databaseInstaller.targetDir,
             onError: (err) => {
+                this.messages('iri', `ERROR: ${err ? err.message : ''}`);
                 this.updateState('iri', { status: 'error', error: err ? err.message : '' })
-            }
+            },
+            onMessage: (message) => this.message('iri', message)
         });
         this.nelson = new nelson.Nelson({
             dataPath: this.databaseInstaller.targetDir,
             onError: (err) => {
+                this.messages('nelson', `ERROR: ${err ? err.message : ''}`);
                 this.updateState('nelson', { status: 'error', error: err ? err.message : '' })
-            }
+            },
+            onMessage: (message) => this.message('nelson', message)
         });
-        this.system = new system.System();
+        this.system = new system.System({
+            onMessage: (message) => this.message('system', message)
+        });
         this.settings = new settings.Settings();
         this.state = {
             system: {
@@ -70,6 +87,7 @@ class Controller {
                     // TODO: add webhook here
                 }
             } else if (this.state.nelson.status === 'error') {
+                this.message('nelson', 'Service seems down, trying to restart...');
                 setTimeout(() => this.nelson.stop().then(() => this.nelson.start()), 5000);
             }
         };
@@ -78,10 +96,12 @@ class Controller {
                 this.updateState('iri', { info });
                 getNelsonInfo();
             }).catch((err) => {
+                this.message('iri', 'Failed getting IRI API update...');
                 this.updateState('iri', { status: 'error', error: err.message });
                 getNelsonInfo();
             });
         } else if (this.state.iri.status === 'error') {
+            this.message('iri', 'IRI seems down, trying to restart in 5 seconds...');
             this.iri.stop();
             getNelsonInfo();
             setTimeout(() => this.iri.start(), 5000);
@@ -108,6 +128,8 @@ class Controller {
                         })
                     }).catch((err) => {
                         // Installation failed
+                        this.message('iri', 'Installation failed');
+                        this.message('database', 'Installation failed');
                         reject(err);
                     })
                 }
@@ -136,6 +158,7 @@ class Controller {
             const getNodeInfo = () => {
                 setTimeout(() => {
                     this.iri.getNodeInfo().then((info) => {
+                        this.message('iri', 'started');
                         this.updateState('iri', { status: 'running', info });
                         resolve();
                     }).catch(getNodeInfo);
@@ -176,10 +199,10 @@ class Controller {
                         ? isSupportedPlatform
                             ? hasEnoughMemory
                                 ? ''
-                                : 'not enough RAM (+4GB)'
+                                : 'not enough RAM (+3.6GB)'
                             : 'operating system is not supported'
-                        : 'java is not installed'
-                    : 'not enough free space (+8GB)'
+                        : 'java v1.8.0_151 or higher is not installed'
+                    : 'not enough free space in home or temp directory (+8GB)'
             });
             return isReady;
         })
@@ -220,6 +243,12 @@ class Controller {
     updateState (component, state) {
         this.state[component] = Object.assign(this.state[component], state);
         this.opts.onStateChange(this.state);
+    }
+
+    message (component, message) {
+        this.messages[component].push(message);
+        this.messages[component] = this.messages[component].splice(-this.opts.maxMessages);
+        this.opts.onMessage(component, message, this.messages);
     }
 
     getState () {

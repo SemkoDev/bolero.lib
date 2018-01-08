@@ -14,7 +14,9 @@ var settings = require('./settings');
 
 var DEFAULT_OPTIONS = {
     targetDir: null,
-    onStateChange: function onStateChange(state) {}
+    maxMessages: 1000,
+    onStateChange: function onStateChange(state) {},
+    onMessage: function onMessage(messages) {}
 };
 
 var Controller = function () {
@@ -25,27 +27,50 @@ var Controller = function () {
 
         this.opts = Object.assign({}, DEFAULT_OPTIONS, options);
         this.state = {};
+        this.messages = {
+            iri: [],
+            system: [],
+            database: [],
+            nelson: []
+        };
         var targetDir = this.opts.targetDir || path.join(process.cwd(), 'data');
         if (!fs.existsSync(targetDir)) {
             fs.mkdirSync(targetDir);
         }
         this.targetDir = targetDir;
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir: targetDir });
-        this.databaseInstaller = new installer.database.DatabaseInstaller({ targetDir: targetDir });
+        this.databaseInstaller = new installer.database.DatabaseInstaller({
+            targetDir: targetDir,
+            onMessage: function onMessage(message) {
+                return _this.message('database', message);
+            }
+        });
         this.iri = new iri.IRI({
             iriPath: this.iriInstaller.getTargetFileName(),
             dbPath: this.databaseInstaller.targetDir,
             onError: function onError(err) {
+                _this.messages('iri', 'ERROR: ' + (err ? err.message : ''));
                 _this.updateState('iri', { status: 'error', error: err ? err.message : '' });
+            },
+            onMessage: function onMessage(message) {
+                return _this.message('iri', message);
             }
         });
         this.nelson = new nelson.Nelson({
             dataPath: this.databaseInstaller.targetDir,
             onError: function onError(err) {
+                _this.messages('nelson', 'ERROR: ' + (err ? err.message : ''));
                 _this.updateState('nelson', { status: 'error', error: err ? err.message : '' });
+            },
+            onMessage: function onMessage(message) {
+                return _this.message('nelson', message);
             }
         });
-        this.system = new system.System();
+        this.system = new system.System({
+            onMessage: function onMessage(message) {
+                return _this.message('system', message);
+            }
+        });
         this.settings = new settings.Settings();
         this.state = {
             system: {
@@ -84,6 +109,7 @@ var Controller = function () {
                         // TODO: add webhook here
                     }
                 } else if (_this2.state.nelson.status === 'error') {
+                    _this2.message('nelson', 'Service seems down, trying to restart...');
                     setTimeout(function () {
                         return _this2.nelson.stop().then(function () {
                             return _this2.nelson.start();
@@ -96,10 +122,12 @@ var Controller = function () {
                     _this2.updateState('iri', { info: info });
                     getNelsonInfo();
                 }).catch(function (err) {
+                    _this2.message('iri', 'Failed getting IRI API update...');
                     _this2.updateState('iri', { status: 'error', error: err.message });
                     getNelsonInfo();
                 });
             } else if (this.state.iri.status === 'error') {
+                this.message('iri', 'IRI seems down, trying to restart in 5 seconds...');
                 this.iri.stop();
                 getNelsonInfo();
                 setTimeout(function () {
@@ -127,6 +155,8 @@ var Controller = function () {
                             });
                         }).catch(function (err) {
                             // Installation failed
+                            _this3.message('iri', 'Installation failed');
+                            _this3.message('database', 'Installation failed');
                             reject(err);
                         });
                     }
@@ -161,6 +191,7 @@ var Controller = function () {
                 var getNodeInfo = function getNodeInfo() {
                     setTimeout(function () {
                         _this5.iri.getNodeInfo().then(function (info) {
+                            _this5.message('iri', 'started');
                             _this5.updateState('iri', { status: 'running', info: info });
                             resolve();
                         }).catch(getNodeInfo);
@@ -205,7 +236,7 @@ var Controller = function () {
                     status: isReady ? 'ready' : 'error',
                     isSupportedPlatform: isSupportedPlatform,
                     hasEnoughMemory: hasEnoughMemory,
-                    error: hasEnoughSpace ? hasJavaInstalled ? isSupportedPlatform ? hasEnoughMemory ? '' : 'not enough RAM (+4GB)' : 'operating system is not supported' : 'java is not installed' : 'not enough free space (+8GB)'
+                    error: hasEnoughSpace ? hasJavaInstalled ? isSupportedPlatform ? hasEnoughMemory ? '' : 'not enough RAM (+3.6GB)' : 'operating system is not supported' : 'java v1.8.0_151 or higher is not installed' : 'not enough free space in home or temp directory (+8GB)'
                 });
                 return isReady;
             });
@@ -248,6 +279,13 @@ var Controller = function () {
         value: function updateState(component, state) {
             this.state[component] = Object.assign(this.state[component], state);
             this.opts.onStateChange(this.state);
+        }
+    }, {
+        key: 'message',
+        value: function message(component, _message) {
+            this.messages[component].push(_message);
+            this.messages[component] = this.messages[component].splice(-this.opts.maxMessages);
+            this.opts.onMessage(component, _message, this.messages);
         }
     }, {
         key: 'getState',

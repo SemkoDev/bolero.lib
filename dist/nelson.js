@@ -19,7 +19,8 @@ var DEFAULT_OPTIONS = {
     neighborsURL: 'https://raw.githubusercontent.com/SemkoDev/nelson.cli/master/ENTRYNODES',
     onError: function onError() {},
     onStarted: function onStarted() {},
-    onStopped: function onStopped() {}
+    onStopped: function onStopped() {},
+    onMessage: function onMessage(message) {}
 };
 
 var Nelson = function () {
@@ -53,6 +54,7 @@ var Nelson = function () {
 
             return this.node.start().then(function () {
                 _this.running = true;
+                _this.opts.onMessage('started');
                 onStarted && onStarted();
             }).catch(onError);
         }
@@ -94,6 +96,7 @@ var Nelson = function () {
                 return Promise.resolve();
             }
             return this.node.end().then(function () {
+                _this3.opts.onMessage('stopped');
                 _this3.running = false;
                 _this3.node = null;
                 onStopped && onStopped();
