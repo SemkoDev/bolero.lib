@@ -48,13 +48,17 @@ class System {
 
     hasEnoughSpace () {
         return new Promise ((resolve) => {
-            diskspace.check(os.homedir(), (err, info) => {
+            const isWindows = os.platform() === 'win32';
+            diskspace.check(isWindows ? 'C' : os.homedir(), (err, info) => {
                 if (err) {
                     resolve(false);
                 } else {
                     if (info.free < this.opts.minimalSpace * 1024 * 1024) {
                         this.opts.onMessage('Not enough space in home directory!');
-                        resolve(false);
+                        return resolve(false);
+                    }
+                    if (isWindows) {
+                        return resolve(true);
                     }
                     diskspace.check(os.tmpdir(), (err, info) => {
                         if (err) {
