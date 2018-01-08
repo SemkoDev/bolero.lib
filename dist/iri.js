@@ -18,7 +18,8 @@ var DEFAULT_OPTIONS = {
     dbPath: '',
     onError: function onError() {},
     onStarted: function onStarted() {},
-    onStopped: function onStopped() {}
+    onStopped: function onStopped() {},
+    onMessage: function onMessage(message) {}
 };
 
 var IRI = function () {
@@ -43,7 +44,9 @@ var IRI = function () {
 
             this.process = spawn('java', ['-jar', this.opts.iriPath, '-c', this._getConfig()]);
             this.process.stderr.on('data', function (data) {
-                // TODO: pass error message?
+                _this.opts.onMessage('STDERR: ' + data.toString());
+            });this.process.stdout.on('data', function (data) {
+                _this.opts.onMessage('STDOUT: ' + data.toString());
             });
             this.process.on('close', function (code) {
                 if (_this.process) {
@@ -51,6 +54,8 @@ var IRI = function () {
                     onError && onError(new Error('IRI exited with status ' + code));
                 }
             });
+
+            this.opts.onMessage('starting...');
 
             this.running = true;
             onStarted && onStarted();
@@ -66,6 +71,7 @@ var IRI = function () {
                 return;
             }
             this.process.kill(signal);
+            this.opts.onMessage('stopped');
             this.running = false;
             this.process = null;
             onStopped && onStopped();

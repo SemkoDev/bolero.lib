@@ -11,6 +11,7 @@ const DEFAULT_OPTIONS = {
     onError: () => {},
     onStarted: () => {},
     onStopped: () => {},
+    onMessage: (message) => {}
 };
 
 class IRI {
@@ -26,7 +27,9 @@ class IRI {
 
         this.process = spawn('java', ['-jar', this.opts.iriPath, '-c', this._getConfig()]);
         this.process.stderr.on('data', (data) => {
-            // TODO: pass error message?
+            this.opts.onMessage(`STDERR: ${data.toString()}`)
+        });this.process.stdout.on('data', (data) => {
+            this.opts.onMessage(`STDOUT: ${data.toString()}`)
         });
         this.process.on('close', (code) => {
             if (this.process) {
@@ -34,6 +37,8 @@ class IRI {
                 onError && onError(new Error(`IRI exited with status ${code}`))
             }
         });
+
+        this.opts.onMessage('starting...');
 
         this.running = true;
         onStarted && onStarted();
@@ -46,6 +51,7 @@ class IRI {
             return;
         }
         this.process.kill(signal);
+        this.opts.onMessage('stopped');
         this.running = false;
         this.process = null;
         onStopped && onStopped()

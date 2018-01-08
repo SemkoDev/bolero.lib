@@ -10,6 +10,7 @@ const DEFAULT_OPTIONS = {
     onError: () => {},
     onStarted: () => {},
     onStopped: () => {},
+    onMessage: (message) => {}
 };
 
 class Nelson {
@@ -34,6 +35,7 @@ class Nelson {
 
         return this.node.start().then(() => {
             this.running = true;
+            this.opts.onMessage('started');
             onStarted && onStarted();
         }).catch(onError);
     }
@@ -67,6 +69,7 @@ class Nelson {
             return Promise.resolve();
         }
         return this.node.end().then(() => {
+            this.opts.onMessage('stopped');
             this.running = false;
             this.node = null;
             onStopped && onStopped()

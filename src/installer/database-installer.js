@@ -9,6 +9,7 @@ const { BaseInstaller } = require('./base-installer');
 const DEFAULT_OPTIONS = {
     name: 'db',
     source: 'http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz',
+    onMessage: (message) => {}
 };
 
 tmp.setGracefulCleanup();
@@ -32,6 +33,7 @@ class DatabaseInstaller extends BaseInstaller {
         }
         const target = this.getTargetFileName(true);
 
+        this.opts.onMessage('Download starting...');
         progress(request(this.opts.source), {
             // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms
             // delay: 1000,                       // Only start to emit after 1000ms delay, defaults to 0ms
@@ -51,19 +53,24 @@ class DatabaseInstaller extends BaseInstaller {
                 //         remaining: 81.403       // The remaining seconds to finish (3 decimals)
                 //     }
                 // }
+                this.opts.onMessage(`Downloading ${(state.percent * 100).toFixed(2)}% finished...`);
                 onProgress && onProgress(state);
             })
             .on('error', (err) => {
+                this.opts.onMessage('Download failed!');
                 onError && onError(err)
             })
             .on('end', () => {
+                this.opts.onMessage('Downloaded. Extracting database...');
                 targz.decompress({
                     src: target,
                     dest: this.targetDir
-                }, function(err){
+                }, (err) => {
                     if(err) {
+                        this.opts.onMessage('Extracting failed!');
                         onError && onError(err);
                     } else {
+                        this.opts.onMessage('Extraction complete!');
                         fs.unlinkSync(target);
                         onEnd && onEnd();
                     }
