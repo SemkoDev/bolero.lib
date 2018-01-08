@@ -72,11 +72,12 @@ class IRI {
 
     _getConfig () {
         const filename = tmp.fileSync().name;
+        // Need to replace backslashes to forward in windows IRI config.
         fs.writeFileSync(filename, `[IRI]
-DB_PATH = ${this.opts.dbPath}
-DB_LOG_PATH = ${this.opts.dbPath}
+DB_PATH = ${this.opts.dbPath.replace(/\\/g, "/")}
+DB_LOG_PATH = ${this.opts.dbPath.replace(/\\/g, "/")}
 PORT = ${this.opts.port}
-IXI_DIR = ${path.join(this.opts.dbPath, 'ixi')}
+IXI_DIR = ${path.join(this.opts.dbPath, 'ixi').replace(/\\/g, "/")}
 HEADLESS = true
 DEBUG = false
 TESTNET = false
