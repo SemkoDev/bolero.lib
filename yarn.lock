@@ -1929,9 +1929,9 @@ nedb@^1.8.0:
     mkdirp "~0.5.1"
     underscore "~1.4.4"
 
-nelson.cli@0.3.15:
-  version "0.3.15"
-  resolved "https://registry.yarnpkg.com/nelson.cli/-/nelson.cli-0.3.15.tgz#7d1f3674086919c95c110cbba7553ada85de79e0"
+nelson.cli@0.3.16:
+  version "0.3.16"
+  resolved "https://registry.yarnpkg.com/nelson.cli/-/nelson.cli-0.3.16.tgz#db7976bec53bf2002be2822d795af550fb518185"
   dependencies:
     blessed "^0.1.81"
     blessed-contrib "^4.8.5"
