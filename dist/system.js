@@ -60,13 +60,17 @@ var System = function () {
             return result;
         }
     }, {
+        key: 'isWindows',
+        value: function isWindows() {
+            return os.platform() === 'win32';
+        }
+    }, {
         key: 'hasEnoughSpace',
         value: function hasEnoughSpace() {
             var _this2 = this;
 
             return new Promise(function (resolve) {
-                var isWindows = os.platform() === 'win32';
-                diskspace.check(isWindows ? 'C' : os.homedir(), function (err, info) {
+                diskspace.check(_this2.isWindows() ? 'C' : os.homedir(), function (err, info) {
                     if (err) {
                         resolve(false);
                     } else {
@@ -74,7 +78,7 @@ var System = function () {
                             _this2.opts.onMessage('Not enough space in home directory!');
                             return resolve(false);
                         }
-                        if (isWindows) {
+                        if (_this2.isWindows()) {
                             return resolve(true);
                         }
                         diskspace.check(os.tmpdir(), function (err, info) {
