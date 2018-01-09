@@ -1,5 +1,6 @@
 const path = require('path');
 const tmp = require('tmp');
+const os = require('os');
 const fs = require('fs');
 const request = require('request');
 const targz = require('targz');
@@ -24,6 +25,12 @@ class DatabaseInstaller extends BaseInstaller {
 
     getTargetFileName (temp=false) {
         return path.join(temp ? tmp.dirSync().name : this.targetDir, this.opts.source.split('/').splice(-1)[0]);
+    }
+
+    isInstalled () {
+        // Until we do not have snappy-disabled snapshots, windows users cannot download the database
+        // and have to sync manually.
+        return os.platform() === 'win32' || super.isInstalled()
     }
 
     install (onProgress, onEnd, onError) {
