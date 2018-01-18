@@ -49,7 +49,7 @@ var Controller = function () {
             iriPath: this.iriInstaller.getTargetFileName(),
             dbPath: this.databaseInstaller.targetDir,
             onError: function onError(err) {
-                _this.messages('iri', 'ERROR: ' + (err ? err.message : ''));
+                _this.message('iri', 'ERROR: ' + (err ? err.message : ''));
                 _this.updateState('iri', { status: 'error', error: err ? err.message : '' });
             },
             onMessage: function onMessage(message) {
@@ -59,7 +59,7 @@ var Controller = function () {
         this.nelson = new nelson.Nelson({
             dataPath: this.databaseInstaller.targetDir,
             onError: function onError(err) {
-                _this.messages('nelson', 'ERROR: ' + (err ? err.message : ''));
+                _this.message('nelson', 'ERROR: ' + (err ? err.message : ''));
                 _this.updateState('nelson', { status: 'error', error: err ? err.message : '' });
             },
             onMessage: function onMessage(message) {
