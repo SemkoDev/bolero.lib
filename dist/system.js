@@ -101,21 +101,37 @@ var System = function () {
 
             return new Promise(function (resolve) {
                 var spawn = child_process.spawn('java', ['-version']);
+                var received = false;
                 spawn.on('error', function () {
+                    _this3.opts.onMessage('Java could not be started!');
                     return resolve(false);
                 });
                 spawn.stderr.on('data', function (data) {
+                    if (received) {
+                        return;
+                    }
+                    received = true;
                     if (!data || !data.toString()) {
+                        _this3.opts.onMessage('Java does not respond!');
                         return resolve(false);
                     }
-                    data = data.toString().split('\n')[0];
-                    var javaVersion = new RegExp('java version').test(data) || new RegExp('openjdk version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+                    _this3.opts.onMessage('Java: \n' + data);
+                    var javaVersion = _this3._parseJavaVersion(data);
                     resolve(javaVersion !== false && _this3._checkJavaVersion(javaVersion));
                 });
             }).then(function (result) {
-                !result && _this3.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
+                !result && _this3.opts.onMessage('No supported Java found on your system! If you just installed, consider restarting your computer.');
                 return result;
             });
+        }
+    }, {
+        key: '_parseJavaVersion',
+        value: function _parseJavaVersion(raw) {
+            var data = raw.toString().split('\n')[0];
+            this.opts.onMessage('Java version line: [' + data + ']');
+            var javaVersion = new RegExp('java version').test(data) || new RegExp('openjdk version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+            this.opts.onMessage('Java version detected: [' + (javaVersion || 'none') + ']');
+            return javaVersion;
         }
     }, {
         key: '_checkJavaVersion',

@@ -37,7 +37,7 @@ class Controller {
             iriPath: this.iriInstaller.getTargetFileName(),
             dbPath: this.databaseInstaller.targetDir,
             onError: (err) => {
-                this.messages('iri', `ERROR: ${err ? err.message : ''}`);
+                this.message('iri', `ERROR: ${err ? err.message : ''}`);
                 this.updateState('iri', { status: 'error', error: err ? err.message : '' })
             },
             onMessage: (message) => this.message('iri', message)
@@ -45,7 +45,7 @@ class Controller {
         this.nelson = new nelson.Nelson({
             dataPath: this.databaseInstaller.targetDir,
             onError: (err) => {
-                this.messages('nelson', `ERROR: ${err ? err.message : ''}`);
+                this.message('nelson', `ERROR: ${err ? err.message : ''}`);
                 this.updateState('nelson', { status: 'error', error: err ? err.message : '' })
             },
             onMessage: (message) => this.message('nelson', message)

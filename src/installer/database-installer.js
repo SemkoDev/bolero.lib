@@ -27,11 +27,13 @@ class DatabaseInstaller extends BaseInstaller {
         return path.join(temp ? tmp.dirSync().name : this.targetDir, this.opts.source.split('/').splice(-1)[0]);
     }
 
+    /**
     isInstalled () {
         // Until we do not have snappy-disabled snapshots, windows users cannot download the database
         // and have to sync manually.
         return os.platform() === 'win32' || super.isInstalled()
     }
+     **/
 
     install (onProgress, onEnd, onError) {
         if (this.isInstalled()) {

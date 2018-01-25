@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.10] - 2018-01-25
+
+### Added
+- Better system Java checks and logging
+
+### Changed
+- Upgraded Nelson
+- Upgraded IRI
+- Made custom IRI for windows only
+- Re-enabled database downloads for windows
+
 ## [0.1.9] - 2018-01-09
 
 ### Changed

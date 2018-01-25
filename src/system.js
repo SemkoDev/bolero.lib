@@ -80,21 +80,38 @@ class System {
     hasJavaInstalled () {
         return new Promise ((resolve) => {
             const spawn = child_process.spawn('java', ['-version']);
+            let received = false;
             spawn.on('error', () => {
+                this.opts.onMessage('Java could not be started!');
                 return resolve(false);
             });
             spawn.stderr.on('data', (data) => {
+                if (received) {
+                    return;
+                }
+                received = true;
                 if (!data || !data.toString()) {
+                    this.opts.onMessage('Java does not respond!');
                     return resolve(false);
                 }
-                data = data.toString().split('\n')[0];
-                const javaVersion = new RegExp('java version').test(data) || new RegExp('openjdk version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+                this.opts.onMessage(`Java: \n${data}`);
+                const javaVersion = this._parseJavaVersion(data);
                 resolve(javaVersion !== false && this._checkJavaVersion(javaVersion));
             });
         }).then((result) => {
-            !result && this.opts.onMessage('No Java found on your system! If you just installed, consider restarting your computer.');
+            !result && this.opts.onMessage('No supported Java found on your system! If you just installed, consider restarting your computer.');
             return result;
         })
+    }
+
+    _parseJavaVersion (raw) {
+        const data = raw.toString().split('\n')[0];
+        this.opts.onMessage(`Java version line: [${data}]`);
+        const javaVersion = new RegExp('java version').test(data) || new RegExp('openjdk version').test(data)
+            ? data.split(' ')[2].replace(/"/g, '')
+            : false;
+        this.opts.onMessage(`Java version detected: [${javaVersion || 'none'}]`);
+        return javaVersion
     }
 
     _checkJavaVersion (versionString) {
