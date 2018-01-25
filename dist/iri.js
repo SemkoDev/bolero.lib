@@ -104,7 +104,7 @@ var IRI = function () {
         value: function _getConfig() {
             var filename = tmp.fileSync().name;
             // Need to replace backslashes to forward in windows IRI config.
-            fs.writeFileSync(filename, '[IRI]\nDB_PATH = ' + this.opts.dbPath.replace(/\\/g, "/") + '\nDB_LOG_PATH = ' + this.opts.dbPath.replace(/\\/g, "/") + '\nPORT = ' + this.opts.port + '\nIXI_DIR = ' + path.join(this.opts.dbPath, 'ixi').replace(/\\/g, "/") + '\nHEADLESS = true\nDEBUG = false\nTESTNET = false\nRESCAN_DB = false\nREMOTE_LIMIT_API="removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors"\n        ');
+            fs.writeFileSync(filename, '[IRI]\nDB_PATH = ' + this.opts.dbPath.replace(/\\/g, "/") + '\nDB_LOG_PATH = ' + this.opts.dbPath.replace(/\\/g, "/") + '\nPORT = ' + this.opts.port + '\nIXI_DIR = ' + path.join(this.opts.dbPath, 'ixi').replace(/\\/g, "/") + '\nHEADLESS = true\nDEBUG = false\nTESTNET = false\nRESCAN_DB = false\nAPI_HOST = 0.0.0.0\nREMOTE_LIMIT_API="removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors"\n        ');
             return filename;
         }
     }]);
