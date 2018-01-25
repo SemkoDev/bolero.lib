@@ -88,6 +88,7 @@ HEADLESS = true
 DEBUG = false
 TESTNET = false
 RESCAN_DB = false
+API_HOST = 0.0.0.0
 REMOTE_LIMIT_API="removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors"
         `);
         return filename
