@@ -219,7 +219,7 @@ var Controller = function () {
             var _this7 = this;
 
             this.updateState('system', { status: 'checking' });
-            return this.system.hasEnoughSpace().then(function (hasEnoughSpace) {
+            return this.system.hasEnoughSpace(this.databaseInstaller.isInstalled()).then(function (hasEnoughSpace) {
                 _this7.updateState('system', { hasEnoughSpace: hasEnoughSpace });
                 return _this7.system.hasJavaInstalled();
             }).then(function (hasJavaInstalled) {

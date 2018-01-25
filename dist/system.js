@@ -69,7 +69,12 @@ var System = function () {
         value: function hasEnoughSpace() {
             var _this2 = this;
 
+            var databaseAlreadyInstalled = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
             return new Promise(function (resolve) {
+                if (databaseAlreadyInstalled) {
+                    return resolve(true);
+                }
                 diskspace.check(_this2.isWindows() ? 'C' : os.homedir(), function (err, info) {
                     if (err) {
                         resolve(false);
