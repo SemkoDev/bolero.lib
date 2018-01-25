@@ -11,7 +11,7 @@
     "src",
     "dist",
     "README.md",
-    "iri-1.4.1.6-bolero.jar"
+    "iri-*.jar"
   ],
   "scripts": {
     "test": "./node_modules/.bin/mocha --timeout 60000 --bail --ui bdd $(find src -name \"*-test.js\")",
