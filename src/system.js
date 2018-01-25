@@ -50,8 +50,11 @@ class System {
         return os.platform() === 'win32'
     }
 
-    hasEnoughSpace () {
+    hasEnoughSpace (databaseAlreadyInstalled = false) {
         return new Promise ((resolve) => {
+            if (databaseAlreadyInstalled) {
+                return resolve(true);
+            }
             diskspace.check(this.isWindows() ? 'C' : os.homedir(), (err, info) => {
                 if (err) {
                     resolve(false);

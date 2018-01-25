@@ -180,7 +180,7 @@ class Controller {
 
     checkSystem () {
         this.updateState('system', { status: 'checking' });
-        return this.system.hasEnoughSpace().then((hasEnoughSpace) => {
+        return this.system.hasEnoughSpace(this.databaseInstaller.isInstalled()).then((hasEnoughSpace) => {
             this.updateState('system', { hasEnoughSpace });
             return this.system.hasJavaInstalled()
         }).then((hasJavaInstalled) => {
