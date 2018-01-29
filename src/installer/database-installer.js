@@ -2,6 +2,7 @@ const path = require('path');
 const tmp = require('tmp');
 const os = require('os');
 const fs = require('fs');
+const rimraf = require('rimraf');
 const request = require('request');
 const targz = require('targz');
 const progress = require('request-progress');
@@ -10,6 +11,7 @@ const { BaseInstaller } = require('./base-installer');
 const DEFAULT_OPTIONS = {
     name: 'db',
     source: 'http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz',
+    databaseVersion: '1.4.2.1',
     onMessage: (message) => {}
 };
 
@@ -28,9 +30,15 @@ class DatabaseInstaller extends BaseInstaller {
     }
 
     isInstalled () {
+        const sinstalled = super.isInstalled();
+        if (sinstalled && this.opts.settings && this.opts.settings.settings.databaseVersion !== DEFAULT_OPTIONS.databaseVersion) {
+            // Delete old database so we can download the new one.
+            rimraf.sync(this.targetDir);
+            return false;
+        }
         // Until we do not have snappy-disabled snapshots, windows users cannot download the database
         // and have to sync manually.
-        return os.platform() === 'win32' || super.isInstalled()
+        return os.platform() === 'win32' || sinstalled
     }
 
     install (onProgress, onEnd, onError) {
@@ -77,6 +85,9 @@ class DatabaseInstaller extends BaseInstaller {
                         this.opts.onMessage('Extracting failed!');
                         onError && onError(err);
                     } else {
+                        this.opts.settings && this.opts.settings.saveSettings({
+                            databaseVersion: DEFAULT_OPTIONS.databaseVersion
+                        });
                         this.opts.onMessage('Extraction complete!');
                         fs.unlinkSync(target);
                         onEnd && onEnd();

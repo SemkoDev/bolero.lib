@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.13] - 2018-01-29
+
+### Added
+- Database versioning through settings
+
+### Changed
+- Upgraded IRI to 1.4.2.1
+
 ## [0.1.12] - 2018-01-25
 
 ### Changed
