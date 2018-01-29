@@ -28,8 +28,12 @@ class Controller {
             fs.mkdirSync(targetDir);
         }
         this.targetDir = targetDir;
+        this.settings = new settings.Settings({
+            basePath: this.targetDir
+        });
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir });
         this.databaseInstaller = new installer.database.DatabaseInstaller({
+            settings: this.settings,
             targetDir,
             onMessage: (message) => this.message('database', message)
         });
@@ -43,7 +47,7 @@ class Controller {
             onMessage: (message) => this.message('iri', message)
         });
         this.nelson = new nelson.Nelson({
-            dataPath: this.databaseInstaller.targetDir,
+            dataPath: this.targetDir,
             onError: (err) => {
                 this.message('nelson', `ERROR: ${err ? err.message : ''}`);
                 this.updateState('nelson', { status: 'error', error: err ? err.message : '' })
@@ -53,7 +57,6 @@ class Controller {
         this.system = new system.System({
             onMessage: (message) => this.message('system', message)
         });
-        this.settings = new settings.Settings();
         this.state = {
             system: {
                 status: 'waiting',

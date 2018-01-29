@@ -3,7 +3,8 @@ const tmp = require('tmp');
 const fs = require('fs');
 
 const DEFAULT_SETTINGS = {
-  version: 0
+    version: 0,
+    databaseVersion: '1.4.1.7'
 };
 
 tmp.setGracefulCleanup();
