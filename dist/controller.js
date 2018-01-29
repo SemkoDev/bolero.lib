@@ -38,8 +38,12 @@ var Controller = function () {
             fs.mkdirSync(targetDir);
         }
         this.targetDir = targetDir;
+        this.settings = new settings.Settings({
+            basePath: this.targetDir
+        });
         this.iriInstaller = new installer.iri.IRIInstaller({ targetDir: targetDir });
         this.databaseInstaller = new installer.database.DatabaseInstaller({
+            settings: this.settings,
             targetDir: targetDir,
             onMessage: function onMessage(message) {
                 return _this.message('database', message);
@@ -57,7 +61,7 @@ var Controller = function () {
             }
         });
         this.nelson = new nelson.Nelson({
-            dataPath: this.databaseInstaller.targetDir,
+            dataPath: this.targetDir,
             onError: function onError(err) {
                 _this.message('nelson', 'ERROR: ' + (err ? err.message : ''));
                 _this.updateState('nelson', { status: 'error', error: err ? err.message : '' });
@@ -71,7 +75,6 @@ var Controller = function () {
                 return _this.message('system', message);
             }
         });
-        this.settings = new settings.Settings();
         this.state = {
             system: {
                 status: 'waiting',

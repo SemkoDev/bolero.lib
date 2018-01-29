@@ -14,6 +14,7 @@ var path = require('path');
 var tmp = require('tmp');
 var os = require('os');
 var fs = require('fs');
+var rimraf = require('rimraf');
 var request = require('request');
 var targz = require('targz');
 var progress = require('request-progress');
@@ -24,6 +25,7 @@ var _require = require('./base-installer'),
 var DEFAULT_OPTIONS = {
     name: 'db',
     source: 'http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz',
+    databaseVersion: '1.4.2.1',
     onMessage: function onMessage(message) {}
 };
 
@@ -51,9 +53,15 @@ var DatabaseInstaller = function (_BaseInstaller) {
     }, {
         key: 'isInstalled',
         value: function isInstalled() {
+            var sinstalled = _get(DatabaseInstaller.prototype.__proto__ || Object.getPrototypeOf(DatabaseInstaller.prototype), 'isInstalled', this).call(this);
+            if (sinstalled && this.opts.settings && this.opts.settings.settings.databaseVersion !== DEFAULT_OPTIONS.databaseVersion) {
+                // Delete old database so we can download the new one.
+                rimraf.sync(this.targetDir);
+                return false;
+            }
             // Until we do not have snappy-disabled snapshots, windows users cannot download the database
             // and have to sync manually.
-            return os.platform() === 'win32' || _get(DatabaseInstaller.prototype.__proto__ || Object.getPrototypeOf(DatabaseInstaller.prototype), 'isInstalled', this).call(this);
+            return os.platform() === 'win32' || sinstalled;
         }
     }, {
         key: 'install',
@@ -100,6 +108,9 @@ var DatabaseInstaller = function (_BaseInstaller) {
                         _this2.opts.onMessage('Extracting failed!');
                         onError && onError(err);
                     } else {
+                        _this2.opts.settings && _this2.opts.settings.saveSettings({
+                            databaseVersion: DEFAULT_OPTIONS.databaseVersion
+                        });
                         _this2.opts.onMessage('Extraction complete!');
                         fs.unlinkSync(target);
                         onEnd && onEnd();
