@@ -34,6 +34,9 @@ class DatabaseInstaller extends BaseInstaller {
         if (sinstalled && this.opts.settings && this.opts.settings.settings.databaseVersion !== DEFAULT_OPTIONS.databaseVersion) {
             // Delete old database so we can download the new one.
             rimraf.sync(this.targetDir);
+            this.opts.settings && this.opts.settings.saveSettings({
+                databaseVersion: DEFAULT_OPTIONS.databaseVersion
+            });
             return false;
         }
         // Until we do not have snappy-disabled snapshots, windows users cannot download the database
