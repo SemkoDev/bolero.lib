@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Applied a Windows/IRI fix from/for #45
+- Fixed database version update on Windows
+
 ## [0.1.13] - 2018-01-29
 
 ### Added
