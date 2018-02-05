@@ -49,27 +49,7 @@ var Controller = function () {
                 return _this.message('database', message);
             }
         });
-        this.iri = new iri.IRI({
-            iriPath: this.iriInstaller.getTargetFileName(),
-            dbPath: this.databaseInstaller.targetDir,
-            onError: function onError(err) {
-                _this.message('iri', 'ERROR: ' + (err ? err.message : ''));
-                _this.updateState('iri', { status: 'error', error: err ? err.message : '' });
-            },
-            onMessage: function onMessage(message) {
-                return _this.message('iri', message);
-            }
-        });
-        this.nelson = new nelson.Nelson({
-            dataPath: this.targetDir,
-            onError: function onError(err) {
-                _this.message('nelson', 'ERROR: ' + (err ? err.message : ''));
-                _this.updateState('nelson', { status: 'error', error: err ? err.message : '' });
-            },
-            onMessage: function onMessage(message) {
-                return _this.message('nelson', message);
-            }
-        });
+        this.reloadSystems();
         this.system = new system.System({
             onMessage: function onMessage(message) {
                 return _this.message('system', message);
@@ -99,34 +79,65 @@ var Controller = function () {
     }
 
     _createClass(Controller, [{
-        key: 'tick',
-        value: function tick() {
+        key: 'reloadSystems',
+        value: function reloadSystems() {
             var _this2 = this;
 
+            this.iri = new iri.IRI({
+                port: this.settings.settings.iriPort,
+                isPublic: this.settings.settings.iriPublic,
+                iriPath: this.iriInstaller.getTargetFileName(),
+                dbPath: this.databaseInstaller.targetDir,
+                onError: function onError(err) {
+                    _this2.message('iri', 'ERROR: ' + (err ? err.message : ''));
+                    _this2.updateState('iri', { status: 'error', error: err ? err.message : '' });
+                },
+                onMessage: function onMessage(message) {
+                    return _this2.message('iri', message);
+                }
+            });
+            this.nelson = new nelson.Nelson({
+                name: this.settings.settings.name,
+                protocol: this.settings.settings.protocol,
+                dataPath: this.targetDir,
+                onError: function onError(err) {
+                    _this2.message('nelson', 'ERROR: ' + (err ? err.message : ''));
+                    _this2.updateState('nelson', { status: 'error', error: err ? err.message : '' });
+                },
+                onMessage: function onMessage(message) {
+                    return _this2.message('nelson', message);
+                }
+            });
+        }
+    }, {
+        key: 'tick',
+        value: function tick() {
+            var _this3 = this;
+
             var getNelsonInfo = function getNelsonInfo() {
-                if (_this2.state.nelson.status === 'running') {
-                    var info = _this2.nelson.getNodeInfo();
-                    _this2.updateState('nelson', { info: info });
-                    _this2.updateCounter += 1;
-                    if (!_this2.updateCounter % 6) {
+                if (_this3.state.nelson.status === 'running') {
+                    var info = _this3.nelson.getNodeInfo();
+                    _this3.updateState('nelson', { info: info });
+                    _this3.updateCounter += 1;
+                    if (!_this3.updateCounter % 6) {
                         // TODO: add webhook here
                     }
-                } else if (_this2.state.nelson.status === 'error') {
-                    _this2.message('nelson', 'Service seems down, trying to restart...');
+                } else if (_this3.state.nelson.status === 'error') {
+                    _this3.message('nelson', 'Service seems down, trying to restart...');
                     setTimeout(function () {
-                        return _this2.nelson.stop().then(function () {
-                            return _this2.nelson.start();
+                        return _this3.nelson.stop().then(function () {
+                            return _this3.nelson.start();
                         });
                     }, 5000);
                 }
             };
             if (this.state.iri.status === 'running') {
                 this.iri.getNodeInfo().then(function (info) {
-                    _this2.updateState('iri', { info: info });
+                    _this3.updateState('iri', { info: info });
                     getNelsonInfo();
                 }).catch(function (err) {
-                    _this2.message('iri', 'Failed getting IRI API update...');
-                    _this2.updateState('iri', { status: 'error', error: err.message });
+                    _this3.message('iri', 'Failed getting IRI API update...');
+                    _this3.updateState('iri', { status: 'error', error: err.message });
                     getNelsonInfo();
                 });
             } else if (this.state.iri.status === 'error') {
@@ -134,22 +145,22 @@ var Controller = function () {
                 this.iri.stop();
                 getNelsonInfo();
                 setTimeout(function () {
-                    return _this2.iri.start();
+                    return _this3.iri.start();
                 }, 5000);
             }
         }
     }, {
         key: 'start',
         value: function start() {
-            var _this3 = this;
+            var _this4 = this;
 
             return new Promise(function (resolve, reject) {
-                _this3.checkSystem().then(function (ready) {
+                _this4.checkSystem().then(function (ready) {
                     if (ready) {
-                        Promise.all([_this3.install('iri'), _this3.install('database')]).then(function () {
-                            Promise.all([_this3.startIRI(), _this3.startNelson()]).then(function () {
-                                _this3.updater = setInterval(function () {
-                                    return _this3.tick();
+                        Promise.all([_this4.install('iri'), _this4.install('database')]).then(function () {
+                            Promise.all([_this4.startIRI(), _this4.startNelson()]).then(function () {
+                                _this4.updater = setInterval(function () {
+                                    return _this4.tick();
                                 }, 5000);
                                 resolve();
                             }).catch(function (err) {
@@ -158,8 +169,8 @@ var Controller = function () {
                             });
                         }).catch(function (err) {
                             // Installation failed
-                            _this3.message('iri', 'Installation failed');
-                            _this3.message('database', 'Installation failed');
+                            _this4.message('iri', 'Installation failed');
+                            _this4.message('database', 'Installation failed');
                             reject(err);
                         });
                     }
@@ -169,7 +180,7 @@ var Controller = function () {
     }, {
         key: 'stop',
         value: function stop() {
-            var _this4 = this;
+            var _this5 = this;
 
             if (this.updater) {
                 clearInterval(this.updater);
@@ -178,24 +189,35 @@ var Controller = function () {
             this.iri.stop('SIGKILL');
             this.updateState('iri', { status: 'stopped' });
             return this.nelson.stop().then(function () {
-                _this4.updateState('nelson', { status: 'stopped' });
+                _this5.updateState('nelson', { status: 'stopped' });
                 return true;
+            });
+        }
+    }, {
+        key: 'updateSettings',
+        value: function updateSettings(config) {
+            var _this6 = this;
+
+            return this.stop().then(function () {
+                _this6.settings.saveSettings(config);
+                _this6.reloadSystems();
+                return _this6.start();
             });
         }
     }, {
         key: 'startIRI',
         value: function startIRI() {
-            var _this5 = this;
+            var _this7 = this;
 
             this.updateState('iri', { status: 'starting' });
             return new Promise(function (resolve) {
-                _this5.iri.start();
+                _this7.iri.start();
 
                 var getNodeInfo = function getNodeInfo() {
                     setTimeout(function () {
-                        _this5.iri.getNodeInfo().then(function (info) {
-                            _this5.message('iri', 'started');
-                            _this5.updateState('iri', { status: 'running', info: info });
+                        _this7.iri.getNodeInfo().then(function (info) {
+                            _this7.message('iri', 'started');
+                            _this7.updateState('iri', { status: 'running', info: info });
                             resolve();
                         }).catch(getNodeInfo);
                     }, 1000);
@@ -206,12 +228,12 @@ var Controller = function () {
     }, {
         key: 'startNelson',
         value: function startNelson() {
-            var _this6 = this;
+            var _this8 = this;
 
             this.updateState('nelson', { status: 'starting' });
             return new Promise(function (resolve) {
-                _this6.nelson.start().then(function () {
-                    _this6.updateState('nelson', { status: 'running', info: _this6.nelson.getNodeInfo() });
+                _this8.nelson.start().then(function () {
+                    _this8.updateState('nelson', { status: 'running', info: _this8.nelson.getNodeInfo() });
                     resolve();
                 });
             });
@@ -219,23 +241,23 @@ var Controller = function () {
     }, {
         key: 'checkSystem',
         value: function checkSystem() {
-            var _this7 = this;
+            var _this9 = this;
 
             this.updateState('system', { status: 'checking' });
             return this.system.hasEnoughSpace(this.databaseInstaller.isInstalled()).then(function (hasEnoughSpace) {
-                _this7.updateState('system', { hasEnoughSpace: hasEnoughSpace });
-                return _this7.system.hasJavaInstalled();
+                _this9.updateState('system', { hasEnoughSpace: hasEnoughSpace });
+                return _this9.system.hasJavaInstalled();
             }).then(function (hasJavaInstalled) {
-                _this7.updateState('system', { hasJavaInstalled: hasJavaInstalled });
+                _this9.updateState('system', { hasJavaInstalled: hasJavaInstalled });
             }).then(function () {
-                var _state$system = _this7.state.system,
+                var _state$system = _this9.state.system,
                     hasEnoughSpace = _state$system.hasEnoughSpace,
                     hasJavaInstalled = _state$system.hasJavaInstalled;
 
-                var isSupportedPlatform = _this7.system.isSupportedPlatform();
-                var hasEnoughMemory = _this7.system.hasEnoughMemory();
+                var isSupportedPlatform = _this9.system.isSupportedPlatform();
+                var hasEnoughMemory = _this9.system.hasEnoughMemory();
                 var isReady = isSupportedPlatform && hasEnoughMemory && hasEnoughSpace && hasJavaInstalled;
-                _this7.updateState('system', {
+                _this9.updateState('system', {
                     status: isReady ? 'ready' : 'error',
                     isSupportedPlatform: isSupportedPlatform,
                     hasEnoughMemory: hasEnoughMemory,
@@ -247,7 +269,7 @@ var Controller = function () {
     }, {
         key: 'install',
         value: function install(component) {
-            var _this8 = this;
+            var _this10 = this;
 
             var installer = null;
             switch (component) {
@@ -261,16 +283,16 @@ var Controller = function () {
             this.updateState(component, { status: 'checking' });
             return new Promise(function (resolve, reject) {
                 if (installer.isInstalled()) {
-                    _this8.updateState(component, { status: 'ready' });
+                    _this10.updateState(component, { status: 'ready' });
                     resolve();
                 } else {
                     installer.install(function (progress) {
-                        return _this8.updateState(component, { status: 'downloading', progress: progress });
+                        return _this10.updateState(component, { status: 'downloading', progress: progress });
                     }, function () {
-                        _this8.updateState(component, { status: 'ready' });
+                        _this10.updateState(component, { status: 'ready' });
                         resolve();
                     }, function (error) {
-                        _this8.updateState(component, { status: 'error', error: error.message });
+                        _this10.updateState(component, { status: 'error', error: error.message });
                         installer.uninstall();
                         reject(error);
                     });
