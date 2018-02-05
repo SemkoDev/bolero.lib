@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2018-02-05
+
+### Added
+- Live settings changing for IRI and Nelson
+
+### Changed
+- Upgraded Nelson to 0.4.0
+
 ## [0.1.14] - 2018-02-01
 
 ### Changed
