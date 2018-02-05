@@ -8,6 +8,7 @@ const { BaseInstaller } = require('./base-installer');
 
 const DEFAULT_OPTIONS = {
     name: 'nelson',
+    latestVersion: 'x.x.x',
     repo: {
         owner: 'SemkoDev',
         repo: 'nelson.cli',
@@ -57,7 +58,7 @@ class BasePackageInstaller extends BaseInstaller {
 
         this.selectVersion().then((version) => {
             if (!version) {
-                onError && onError(new Error(`could not find version ${this.opts.version} in latest!`));
+                onError && onError(new Error(`could not find version ${this.opts.latestVersion} in latest!`));
             }
             progress(request(version.download_url), {
                 // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms

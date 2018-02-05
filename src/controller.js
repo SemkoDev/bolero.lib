@@ -37,23 +37,7 @@ class Controller {
             targetDir,
             onMessage: (message) => this.message('database', message)
         });
-        this.iri = new iri.IRI({
-            iriPath: this.iriInstaller.getTargetFileName(),
-            dbPath: this.databaseInstaller.targetDir,
-            onError: (err) => {
-                this.message('iri', `ERROR: ${err ? err.message : ''}`);
-                this.updateState('iri', { status: 'error', error: err ? err.message : '' })
-            },
-            onMessage: (message) => this.message('iri', message)
-        });
-        this.nelson = new nelson.Nelson({
-            dataPath: this.targetDir,
-            onError: (err) => {
-                this.message('nelson', `ERROR: ${err ? err.message : ''}`);
-                this.updateState('nelson', { status: 'error', error: err ? err.message : '' })
-            },
-            onMessage: (message) => this.message('nelson', message)
-        });
+        this.reloadSystems();
         this.system = new system.System({
             onMessage: (message) => this.message('system', message)
         });
@@ -78,6 +62,30 @@ class Controller {
         this.updater = null;
         this.updateCounter = 0;
         this.updateState = this.updateState.bind(this);
+    }
+
+    reloadSystems () {
+        this.iri = new iri.IRI({
+            port: this.settings.settings.iriPort,
+            isPublic: this.settings.settings.iriPublic,
+            iriPath: this.iriInstaller.getTargetFileName(),
+            dbPath: this.databaseInstaller.targetDir,
+            onError: (err) => {
+                this.message('iri', `ERROR: ${err ? err.message : ''}`);
+                this.updateState('iri', { status: 'error', error: err ? err.message : '' })
+            },
+            onMessage: (message) => this.message('iri', message)
+        });
+        this.nelson = new nelson.Nelson({
+            name: this.settings.settings.name,
+            protocol: this.settings.settings.protocol,
+            dataPath: this.targetDir,
+            onError: (err) => {
+                this.message('nelson', `ERROR: ${err ? err.message : ''}`);
+                this.updateState('nelson', { status: 'error', error: err ? err.message : '' })
+            },
+            onMessage: (message) => this.message('nelson', message)
+        });
     }
 
     tick () {
@@ -150,6 +158,14 @@ class Controller {
         return this.nelson.stop().then(() => {
             this.updateState('nelson', { status: 'stopped' });
             return true;
+        })
+    }
+
+    updateSettings (config) {
+        return this.stop().then(() => {
+            this.settings.saveSettings(config);
+            this.reloadSystems();
+            return this.start();
         })
     }
 

@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 
 const DEFAULT_OPTIONS = {
     port: 14265,
+    isPublic: true,
     iriPath: '',
     dbPath: '',
     onError: () => {},
@@ -88,7 +89,7 @@ HEADLESS = true
 DEBUG = false
 TESTNET = false
 RESCAN_DB = false
-API_HOST = 0.0.0.0
+API_HOST = ${this.opts.isPublic ? '0.0.0.0' : '127.0.0.1'}
 REMOTE_LIMIT_API="removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors"
         `);
         return filename

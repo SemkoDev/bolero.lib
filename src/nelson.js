@@ -1,10 +1,15 @@
 const { Node } = require('nelson.cli');
+const { createAPI } = require('nelson.cli/dist/api/index');
+const { getNodeStats } = require('nelson.cli/dist/api/node');
 const request = require('request');
 const path = require('path');
 const { DEFAULT_OPTIONS: { latestVersion: version } } = require('./installer/nelson-installer');
+const DEFAULT_IRI_OPTIONS = require('./iri').DEFAULT_OPTIONS;
 
 const DEFAULT_OPTIONS = {
-    iriPort: 14265,
+    name: 'Bolero',
+    protocol: 'prefertcp',
+    iriPort: DEFAULT_IRI_OPTIONS.port,
     dataPath: '',
     neighborsURL: 'https://raw.githubusercontent.com/SemkoDev/nelson.cli/master/ENTRYNODES',
     onError: () => {},
@@ -25,17 +30,20 @@ class Nelson {
         const { onError, onStarted } = this.opts;
 
         this.node = new Node({
-            name: 'Bolero',
+            name: this.opts.name,
             neighbors: this.neighbors,
             silent: true,
             IRIPort: this.opts.iriPort,
-            IRIProtocol: 'prefertcp',
+            IRIProtocol: this.opts.protocol,
             dataPath: path.join(this.opts.dataPath, 'neighbors.db')
         });
 
         return this.node.start().then(() => {
             this.running = true;
             this.opts.onMessage('started');
+            this.api = createAPI({
+                node: this.node
+            });
             onStarted && onStarted();
         }).catch(onError);
     }
@@ -72,6 +80,10 @@ class Nelson {
             this.opts.onMessage('stopped');
             this.running = false;
             this.node = null;
+            if (this.api) {
+                this.api.close();
+                this.api = null;
+            }
             onStopped && onStopped()
         });
     }
@@ -93,129 +105,6 @@ class Nelson {
             (!tokens[3] || Number.isInteger(parseInt(tokens[3]))) &&
             (!tokens[4] || !!parseFloat(tokens[4]))
         );
-    }
-}
-
-function getNodeStats (node) {
-    const {
-        cycleInterval,
-        epochInterval,
-        beatInterval,
-        dataPath,
-        port,
-        apiPort,
-        IRIPort,
-        TCPPort,
-        UDPPort,
-        isMaster,
-        temporary
-    } = node.opts;
-    const {
-        lastCycle,
-        lastEpoch,
-        personality,
-        currentCycle,
-        currentEpoch,
-        startDate
-    } = node.heart;
-    const totalPeers = node.list.all().length;
-    const isIRIHealthy = node.iri && node.iri.isHealthy;
-    const iriStats = node.iri && node.iri.iriStats;
-    const connectedPeers = Array.from(node.sockets.keys())
-        .filter((p) => node.sockets.get(p).readyState === 1)
-        .map((p) => {
-            const {
-                name,
-                hostname,
-                ip,
-                port,
-                TCPPort,
-                UDPPort,
-                seen,
-                connected,
-                tried,
-                weight,
-                dateTried,
-                dateLastConnected,
-                dateCreated,
-                isTrusted,
-                lastConnections
-            } = p.data;
-            return {
-                name,
-                hostname,
-                ip,
-                port,
-                TCPPort,
-                UDPPort,
-                seen,
-                connected,
-                tried,
-                weight,
-                dateTried,
-                dateLastConnected,
-                dateCreated,
-                isTrusted,
-                lastConnections
-            }
-        });
-
-    return {
-        name: node.opts.name,
-        version,
-        ready: node._ready,
-        isIRIHealthy,
-        iriStats,
-        peerStats: getSummary(node),
-        totalPeers,
-        connectedPeers,
-        config: {
-            cycleInterval,
-            epochInterval,
-            beatInterval,
-            dataPath,
-            port,
-            apiPort,
-            IRIPort,
-            TCPPort,
-            UDPPort,
-            isMaster,
-            temporary
-        },
-        heart: {
-            lastCycle,
-            lastEpoch,
-            personality,
-            currentCycle,
-            currentEpoch,
-            startDate
-        }
-    }
-}
-
-function getSummary (node) {
-    const now = new Date();
-    const hour = 3600000;
-    const hourAgo = new Date(now - hour);
-    const fourAgo = new Date(now - (hour * 4));
-    const twelveAgo = new Date(now - (hour * 12));
-    const dayAgo = new Date(now - (hour * 24));
-    const weekAgo = new Date(now - (hour * 24 * 7));
-    return {
-        newNodes: {
-            hourAgo: node.list.all().filter(p => p.data.dateCreated >= hourAgo).length,
-            fourAgo: node.list.all().filter(p => p.data.dateCreated >= fourAgo).length,
-            twelveAgo: node.list.all().filter(p => p.data.dateCreated >= twelveAgo).length,
-            dayAgo: node.list.all().filter(p => p.data.dateCreated >= dayAgo).length,
-            weekAgo: node.list.all().filter(p => p.data.dateCreated >= weekAgo).length,
-        },
-        activeNodes: {
-            hourAgo: node.list.all().filter(p => p.data.dateLastConnected >= hourAgo).length,
-            fourAgo: node.list.all().filter(p => p.data.dateLastConnected >= fourAgo).length,
-            twelveAgo: node.list.all().filter(p => p.data.dateLastConnected >= twelveAgo).length,
-            dayAgo: node.list.all().filter(p => p.data.dateLastConnected >= dayAgo).length,
-            weekAgo: node.list.all().filter(p => p.data.dateLastConnected >= weekAgo).length,
-        }
     }
 }
 
