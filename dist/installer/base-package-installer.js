@@ -22,6 +22,7 @@ var _require = require('./base-installer'),
 
 var DEFAULT_OPTIONS = {
     name: 'nelson',
+    latestVersion: 'x.x.x',
     repo: {
         owner: 'SemkoDev',
         repo: 'nelson.cli'
@@ -88,7 +89,7 @@ var BasePackageInstaller = function (_BaseInstaller) {
 
             this.selectVersion().then(function (version) {
                 if (!version) {
-                    onError && onError(new Error('could not find version ' + _this2.opts.version + ' in latest!'));
+                    onError && onError(new Error('could not find version ' + _this2.opts.latestVersion + ' in latest!'));
                 }
                 progress(request(version.download_url), {
                     // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms

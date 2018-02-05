@@ -7,10 +7,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var path = require('path');
 var tmp = require('tmp');
 var fs = require('fs');
+var DEFAULT_IRI_OPTIONS = require('./iri').DEFAULT_OPTIONS;
+var DEFAULT_NELSON_OPTIONS = require('./nelson').DEFAULT_OPTIONS;
 
 var DEFAULT_SETTINGS = {
     version: 0,
-    databaseVersion: '1.4.1.7'
+    databaseVersion: '1.4.2.1',
+    iriPort: DEFAULT_IRI_OPTIONS.port,
+    iriPublic: DEFAULT_IRI_OPTIONS.isPublic,
+    name: DEFAULT_NELSON_OPTIONS.name,
+    protocol: DEFAULT_NELSON_OPTIONS.protocol
 };
 
 tmp.setGracefulCleanup();
@@ -36,7 +42,7 @@ var Settings = function () {
         key: 'saveSettings',
         value: function saveSettings(config) {
             this.settings = Object.assign({}, this.settings, config);
-            fs.writeFileSync(this.settingsPath, JSON.stringify(this.settings));
+            fs.writeFileSync(this.settingsPath, JSON.stringify(this.settings, null, 4));
             return this.settings;
         }
     }, {
