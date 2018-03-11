@@ -3,6 +3,7 @@ const fs = require('fs');
 const installer = require('./installer');
 const iri = require('./iri');
 const nelson = require('./nelson');
+const field = require('./field');
 const system = require('./system');
 const settings = require('./settings');
 
@@ -21,7 +22,8 @@ class Controller {
             iri: [],
             system: [],
             database: [],
-            nelson: []
+            nelson: [],
+            field: []
         };
         const targetDir = this.opts.targetDir || path.join(process.cwd(), 'data');
         if (!fs.existsSync(targetDir)) {
@@ -55,6 +57,9 @@ class Controller {
             nelson: {
                 status: 'waiting'
             },
+            field: {
+                status: 'waiting'
+            },
             database: {
                 status: 'waiting'
             },
@@ -86,6 +91,13 @@ class Controller {
             },
             onMessage: (message) => this.message('nelson', message)
         });
+        this.field = new field.Field({
+          name: this.settings.settings.name,
+          seed: this.settings.settings.seed,
+          address: this.settings.settings.address,
+          iriPort: this.settings.settings.iriPort,
+          onMessage: (message) => this.message('field', message)
+        })
     }
 
     tick () {
@@ -94,9 +106,6 @@ class Controller {
                 const info = this.nelson.getNodeInfo();
                 this.updateState('nelson', { info });
                 this.updateCounter += 1;
-                if (!this.updateCounter % 6) {
-                    // TODO: add webhook here
-                }
             } else if (this.state.nelson.status === 'error') {
                 this.message('nelson', 'Service seems down, trying to restart...');
                 setTimeout(() => this.nelson.stop().then(() => this.nelson.start()), 5000);
@@ -129,7 +138,8 @@ class Controller {
                     ]).then(() => {
                         Promise.all([
                             this.startIRI(),
-                            this.startNelson()
+                            this.startNelson(),
+                            this.startField()
                         ]).then(() => {
                             this.updater = setInterval(() => this.tick(), 5000);
                             resolve();
@@ -157,7 +167,10 @@ class Controller {
         this.updateState('iri', { status: 'stopped' });
         return this.nelson.stop().then(() => {
             this.updateState('nelson', { status: 'stopped' });
-            return true;
+            return this.field.stop().then(() => {
+              this.updateState('field', { status: 'stopped' });
+              return true;
+            });
         })
     }
 
@@ -192,6 +205,16 @@ class Controller {
         return new Promise((resolve) => {
             this.nelson.start().then(() => {
                 this.updateState('nelson', { status: 'running', info: this.nelson.getNodeInfo() });
+                resolve();
+            });
+        });
+    }
+
+    startField () {
+        this.updateState('field', { status: 'starting' });
+        return new Promise((resolve) => {
+            this.field.start().then(() => {
+                this.updateState('field', { status: 'running', info: this.field.getFieldInfo() });
                 resolve();
             });
         });

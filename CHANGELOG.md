@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.0] - 2018-03-11
+
+### Added
+- CarrIOTA Field
+
+### Changed
+- Upgraded IRI to 1.4.2.2
+
 ## [0.2.0] - 2018-02-05
 
 ### Added
