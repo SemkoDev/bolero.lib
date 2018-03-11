@@ -30,6 +30,7 @@
   "license": "ISC",
   "dependencies": {
     "diskspace": "^2.0.0",
+    "field.cli": "^0.1.5",
     "fs-extra": "^5.0.0",
     "get-latest-release": "^1.1.2",
     "iota.lib.js": "^0.4.6",

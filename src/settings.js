@@ -3,6 +3,7 @@ const tmp = require('tmp');
 const fs = require('fs');
 const DEFAULT_IRI_OPTIONS = require('./iri').DEFAULT_OPTIONS;
 const DEFAULT_NELSON_OPTIONS = require('./nelson').DEFAULT_OPTIONS;
+const DEFAULT_FIELD_OPTIONS = require('./field').DEFAULT_OPTIONS;
 
 const DEFAULT_SETTINGS = {
     version: 0,
@@ -10,7 +11,9 @@ const DEFAULT_SETTINGS = {
     iriPort: DEFAULT_IRI_OPTIONS.port,
     iriPublic: DEFAULT_IRI_OPTIONS.isPublic,
     name: DEFAULT_NELSON_OPTIONS.name,
-    protocol: DEFAULT_NELSON_OPTIONS.protocol
+    protocol: DEFAULT_NELSON_OPTIONS.protocol,
+    seed: DEFAULT_FIELD_OPTIONS.seed,
+    address: DEFAULT_FIELD_OPTIONS.address,
 };
 
 tmp.setGracefulCleanup();

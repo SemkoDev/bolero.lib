@@ -7,7 +7,7 @@ process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
 });
 
-describe.skip('Controller', () => {
+describe('Controller', () => {
     const targetDir = path.join(__dirname, '..', '..', 'data');
 
     it('starts and stops Controller', function(done) {
