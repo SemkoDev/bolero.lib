@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.0] - 2018-03-13
+
+### Changed
+- Saving of default settings when upgrading Bolero.
+- Not restarting download when settings are saved in between.
+
 ## [0.3.0] - 2018-03-11
 
 ### Added

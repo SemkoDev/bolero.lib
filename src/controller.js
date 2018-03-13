@@ -175,6 +175,13 @@ class Controller {
     }
 
     updateSettings (config) {
+        const doNotStop = ['iri', 'database']
+            .filter(k => ['checking', 'downloading'].includes(this.state[k].status))
+            .length > 0;
+        if (doNotStop) {
+          this.settings.saveSettings(config);
+          this.reloadSystems();
+        }
         return this.stop().then(() => {
             this.settings.saveSettings(config);
             this.reloadSystems();
