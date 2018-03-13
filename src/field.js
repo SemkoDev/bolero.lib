@@ -15,11 +15,7 @@ const DEFAULT_OPTIONS = {
 class LoggedField extends FieldBase {
   log () {
     const { onMessage } = this.opts;
-    const date = new Date();
-    const timeString = `${date.toLocaleTimeString()}.${this.formatMilliseconds(
-      date.getMilliseconds()
-    )}`;
-    onMessage(`${timeString}\t`, ...arguments)
+    onMessage(Array.from(arguments).join(' '))
   }
 }
 
