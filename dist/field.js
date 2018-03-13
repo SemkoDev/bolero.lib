@@ -38,9 +38,7 @@ var LoggedField = function (_FieldBase) {
     value: function log() {
       var onMessage = this.opts.onMessage;
 
-      var date = new Date();
-      var timeString = date.toLocaleTimeString() + '.' + this.formatMilliseconds(date.getMilliseconds());
-      onMessage.apply(undefined, [timeString + '\t'].concat(Array.prototype.slice.call(arguments)));
+      onMessage(Array.from(arguments).join(' '));
     }
   }]);
 
