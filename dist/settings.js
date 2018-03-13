@@ -30,7 +30,7 @@ var Settings = function () {
 
         this.opts = options || {};
         this.settingsPath = path.join(this.opts.basePath || tmp.dirSync().name, 'settings.json');
-        this.settings = this.loadSettings();
+        this.settings = this.saveSettings(Object.assign({}, DEFAULT_SETTINGS, this.loadSettings()));
     }
 
     _createClass(Settings, [{
