@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.3.2] - 2018-03-13
+## [0.3.3] - 2018-03-13
 
 ### Changed
 - Fixed Field logging.
