@@ -15,7 +15,9 @@ const DEFAULT_OPTIONS = {
 class LoggedField extends FieldBase {
   log () {
     const { onMessage } = this.opts;
-    onMessage(Array.from(arguments).join(' '))
+    onMessage(Array.from(arguments).map(a => (
+      typeof a === 'object' ? JSON.stringify(a) : a.toString()
+    )).join(' '))
   }
 }
 
