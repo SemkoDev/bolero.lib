@@ -212,6 +212,13 @@ var Controller = function () {
         value: function updateSettings(config) {
             var _this6 = this;
 
+            var doNotStop = ['iri', 'database'].filter(function (k) {
+                return ['checking', 'downloading'].includes(_this6.state[k].status);
+            }).length > 0;
+            if (doNotStop) {
+                this.settings.saveSettings(config);
+                this.reloadSystems();
+            }
             return this.stop().then(function () {
                 _this6.settings.saveSettings(config);
                 _this6.reloadSystems();
