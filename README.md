@@ -1,3 +1,8 @@
 # CarrIOTA Bolero Library
 
 Library for the Bolero application.
+
+Donations are very welcome:
+```
+AJXXFJUEQHKPYIOUIUO9FWCMOAFBZAZPXIFRI9FLDQZJGHQENG9HNMODUZJCHR9RHHUSBHWJELGRDOWZRNWYLYCQW
+```
