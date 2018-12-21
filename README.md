@@ -1,8 +1,6 @@
-# Deviota Bolero Library
+# Bolero Library
 
 Library for the Bolero application.
 
 Donations are very welcome:
-```
-IYUIUCFNGOEEQHT9CQU9VYJVOJMQI9VYTQGQLTBAKTFIPWWRBFEV9TJWUZU9EYEFPM9VB9QYXTSMCDKMDABASVXPPX
-```
+
